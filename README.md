@@ -1,40 +1,70 @@
----
-status: "Doing"
----
-
 # Semantic Security Defense Module (SSDM)
 
 AI コーディングエージェント（Claude Code / Cursor / Codex CLI）を安全に運用するための、**セキュリティ規範とツール設定のテンプレート集**です。
 「AI に読ませるルール」と「AI が破っても止まる物理的な制限」を組み合わせ、利用規模に応じて 3 段階（Basic / Standard / Advanced）で導入できます。
 
-- [第 1 部: エンジニア向け](#第-1-部-エンジニア向け)
-- [第 2 部: 非エンジニア向け](#第-2-部-非エンジニア向け)
-- [関連資料](#関連資料)
+- [Semantic Security Defense Module (SSDM)](#semantic-security-defense-module-ssdm)
+  - [第 1 部: エンジニア向け](#第-1-部-エンジニア向け)
+    - [1. Overview](#1-overview)
+    - [2. Features](#2-features)
+    - [3. Architecture](#3-architecture)
+    - [4. Repository Structure](#4-repository-structure)
+    - [5. Requirements](#5-requirements)
+    - [6. Setup](#6-setup)
+    - [7. Configuration](#7-configuration)
+    - [8. Usage](#8-usage)
+    - [9. Development](#9-development)
+    - [10. Testing](#10-testing)
+    - [11. Deployment / Operation](#11-deployment--operation)
+    - [12. Security Notes](#12-security-notes)
+    - [13. Troubleshooting](#13-troubleshooting)
+    - [14. Roadmap](#14-roadmap)
+    - [15. License](#15-license)
+  - [第 2 部: 非エンジニア向け](#第-2-部-非エンジニア向け)
+    - [1. このリポジトリでできること](#1-このリポジトリでできること)
+    - [2. 誰のためのものか](#2-誰のためのものか)
+    - [3. 解決する課題](#3-解決する課題)
+    - [4. 主な使い方](#4-主な使い方)
+    - [5. 導入で変わること](#5-導入で変わること)
+    - [6. 注意点](#6-注意点)
+    - [7. よくある質問](#7-よくある質問)
+    - [8. 相談・運用時の確認事項](#8-相談運用時の確認事項)
+  - [関連資料](#関連資料)
 
 ---
 
+
+
 ## 第 1 部: エンジニア向け
+
+
 
 ### 1. Overview
 
-| 項目 | 内容 |
-| --- | --- |
-| 種別 | ドキュメント（仕様書・設定テンプレート集）。実行可能なアプリやライブラリではない |
-| 対象エージェント | Claude Code / Cursor（IDE・CLI）/ Codex CLI |
-| 派生元 | CE-MAX v1.7 Semantic Security（§-1 / §5-1 / §6 / §8） |
-| ティア決定軸 | 業種ではなく **データ区分 × エージェント権限** |
-| 文書ステータス | `Draft for review`（各文書 v1.0、最終更新 2026-09-19） |
+
+| 項目       | 内容                                                  |
+| -------- | --------------------------------------------------- |
+| 種別       | ドキュメント（仕様書・設定テンプレート集）。実行可能なアプリやライブラリではない            |
+| 対象エージェント | Claude Code / Cursor（IDE・CLI）/ Codex CLI            |
+| 派生元      | CE-MAX v1.7 Semantic Security（§-1 / §5-1 / §6 / §8） |
+| ティア決定軸   | 業種ではなく **データ区分 × エージェント権限**                         |
+| 文書ステータス  | `Draft for review`（各文書 v1.0、最終更新 2026-09-19）        |
+
+
+
 
 ### 2. Features
 
 - **2 層防御モデル**
-    - L-N（Semantic Norm Layer）: LLM が読む規範。入力分類、命令と参照の分離、侵入命令の無効化、確認必須操作の宣言
-    - L-E（Enforcement Layer）: 権限設定・フック・サンドボックス・隔離環境による物理遮断
+  - L-N（Semantic Norm Layer）: LLM が読む規範。入力分類、命令と参照の分離、侵入命令の無効化、確認必須操作の宣言
+  - L-E（Enforcement Layer）: 権限設定・フック・サンドボックス・隔離環境による物理遮断
 - **3 ティア構成**: 上位ティアは下位ティアを包含し、差分のみ記載
 - **貼り付け可能なルールブロック**: `CLAUDE.md` / `AGENTS.md` / `.cursor/rules/*.mdc` にそのまま貼れる L-N ルール（N1〜N15）
 - **ツール別設定例**: `.claude/settings.json`、managed settings、`.cursor/cli.json`、`~/.codex/config.toml`、Dev Container、seccomp、nftables
 - **補助スクリプト例**: Bash ガードフック、パーミッション固定、監査ログ、ハッシュチェーン
 - **検証ケース**: 導入時・設定変更時に実施する期待結果付きテスト手順
+
+
 
 ### 3. Architecture
 
@@ -58,19 +88,25 @@ AI コーディングエージェント（Claude Code / Cursor / Codex CLI）を
 
 ティア別の適用条件:
 
-| ティア | データ区分 | エージェント権限 | 承認者 | 典型例 |
-| --- | --- | --- | --- | --- |
-| Basic | D0 公開 / D1 自社内部 | P1 作業ディレクトリ読み書き / P2 限定シェル | 利用者本人 | 個人開発、小規模事業者 |
-| Standard | D2 他者の個人情報・守秘対象 | P1〜P3（認証付き外部サービス書込） | 本人とは別の責任者 | 士業、上場企業、情報システム部門 |
-| Advanced | D3 要配慮個人情報・決済・要機密 | P4 本番・基幹に影響する操作 | 職務分掌された複数人＋監査 | 医療、金融、官公庁 |
+
+| ティア      | データ区分             | エージェント権限                   | 承認者           | 典型例              |
+| -------- | ----------------- | -------------------------- | ------------- | ---------------- |
+| Basic    | D0 公開 / D1 自社内部   | P1 作業ディレクトリ読み書き / P2 限定シェル | 利用者本人         | 個人開発、小規模事業者      |
+| Standard | D2 他者の個人情報・守秘対象   | P1〜P3（認証付き外部サービス書込）        | 本人とは別の責任者     | 士業、上場企業、情報システム部門 |
+| Advanced | D3 要配慮個人情報・決済・要機密 | P4 本番・基幹に影響する操作            | 職務分掌された複数人＋監査 | 医療、金融、官公庁        |
+
 
 統制のティア別追加範囲:
 
-| ティア | L-N ルール | L-E 統制 | バックエンドの主眼 |
-| --- | --- | --- | --- |
-| Basic | N1〜N6 | E1〜E3 | ファイルパーミッション、CLI ツールの既定 deny/ask |
-| Standard | + N7〜N11 | + E4〜E8 | managed settings 配布、組織プロキシ、Pre-hook、ログ保管 |
-| Advanced | + N12〜N15 | + E9〜E15 | コンテナ/VM 隔離、Egress 物理遮断、改ざん防止監査ログ |
+
+| ティア      | L-N ルール   | L-E 統制   | バックエンドの主眼                                |
+| -------- | --------- | -------- | ---------------------------------------- |
+| Basic    | N1〜N6     | E1〜E3    | ファイルパーミッション、CLI ツールの既定 deny/ask          |
+| Standard | + N7〜N11  | + E4〜E8  | managed settings 配布、組織プロキシ、Pre-hook、ログ保管 |
+| Advanced | + N12〜N15 | + E9〜E15 | コンテナ/VM 隔離、Egress 物理遮断、改ざん防止監査ログ         |
+
+
+
 
 ### 4. Repository Structure
 
@@ -83,6 +119,7 @@ Semantic-Security-Defense-Module/
 │   ├── 01-semantic-security-module-standard.md
 │   └── 01-semantic-security-module-advanced.md
 └── 02-enforcement-backend/               # L-E 物理強制層（バックエンド）
+    ├── README.md                         # ティア選択と収録物の一覧
     ├── 02-enforcement-backend-basic.md
     ├── 02-enforcement-backend-standard.md
     └── 02-enforcement-backend-advanced.md
@@ -93,14 +130,18 @@ L-E の実装（E1〜E15）は `02-*` が正です。`01-*-basic.md` §3 にも 
 
 ### 5. Requirements
 
-| 対象 | 要件 |
-| --- | --- |
-| 文書の閲覧 | Markdown ビューア（GitHub 等） |
-| Claude Code のガードフック | `bash`、`jq` |
+
+| 対象                            | 要件                                                               |
+| ----------------------------- | ---------------------------------------------------------------- |
+| 文書の閲覧                         | Markdown ビューア（GitHub 等）                                          |
+| Claude Code のガードフック           | `bash`、`jq`                                                      |
 | Claude Code / Cursor のサンドボックス | macOS / Linux / WSL2。Windows ネイティブは Claude Code 非対応、Cursor は明示なし |
-| Advanced の隔離環境 | Docker（gVisor / Kata Containers 推奨）または専用 VM |
-| Standard の組織配布 | MDM またはシステムディレクトリへの `managed-settings.json` 配置手段 |
-| ビルド・依存パッケージ | なし（本リポジトリ自体にビルド工程はない） |
+| Advanced の隔離環境                | Docker（gVisor / Kata Containers 推奨）または専用 VM                      |
+| Standard の組織配布                | MDM またはシステムディレクトリへの `managed-settings.json` 配置手段                 |
+| ビルド・依存パッケージ                   | なし（本リポジトリ自体にビルド工程はない）                                            |
+
+
+
 
 ### 6. Setup
 
@@ -112,11 +153,13 @@ L-E の実装（E1〜E15）は `02-*` が正です。`01-*-basic.md` §3 にも 
 4. 両文書の検証ケースを 1 件ずつ実行し、全件が期待どおりになることを確認する
 5. 設定ファイルとフックを Git にコミットし、チームに配布する
 
-| ティア | フロントエンド | バックエンド |
-| --- | --- | --- |
-| Basic | `01-semantic-security-module/01-semantic-security-module-basic.md` | `02-enforcement-backend/02-enforcement-backend-basic.md` |
+
+| ティア      | フロントエンド                                                               | バックエンド                                                      |
+| -------- | --------------------------------------------------------------------- | ----------------------------------------------------------- |
+| Basic    | `01-semantic-security-module/01-semantic-security-module-basic.md`    | `02-enforcement-backend/02-enforcement-backend-basic.md`    |
 | Standard | `01-semantic-security-module/01-semantic-security-module-standard.md` | `02-enforcement-backend/02-enforcement-backend-standard.md` |
 | Advanced | `01-semantic-security-module/01-semantic-security-module-advanced.md` | `02-enforcement-backend/02-enforcement-backend-advanced.md` |
+
 
 Basic の導入目安は「本人で 30 分以内」と記載されています。Standard / Advanced の所要時間は明示なしです。
 
@@ -124,15 +167,17 @@ Basic の導入目安は「本人で 30 分以内」と記載されています�
 
 各文書が扱う主な設定ファイルです。具体的な値は該当文書を参照してください。
 
-| 対象 | 配置先 | 主な設定 | ティア |
-| --- | --- | --- | --- |
-| Claude Code | `.claude/settings.json` | `permissions.deny` / `ask`、`sandbox`、`hooks.PreToolUse` | Basic〜 |
-| Claude Code | `.claude/hooks/guard-bash.sh` | 取得物のシェル直結、秘密ファイル読取、自己設定書換の遮断 | Basic〜 |
-| Claude Code | `managed-settings.json` | 組織配布、`allowManagedPermissionRulesOnly`、`allowManagedHooksOnly` | Standard〜 |
-| Cursor CLI | `.cursor/cli.json` | `permissions.allow` / `deny` | Basic〜 |
-| Cursor IDE | `.cursorignore`、`.cursor/permissions.json`、`.cursor/sandbox.json` | 秘密ファイル不可視化、Run Mode、ネットワーク | Basic〜 |
-| Codex CLI | `~/.codex/config.toml` | `approval_policy = "on-request"`、`sandbox_mode = "workspace-write"` | Basic〜 |
-| 隔離環境 | `.devcontainer/`、`Dockerfile`、`seccomp-ssdm.json` | 非 root、capability 削除、`--network none` | Advanced |
+
+| 対象          | 配置先                                                               | 主な設定                                                                | ティア       |
+| ----------- | ----------------------------------------------------------------- | ------------------------------------------------------------------- | --------- |
+| Claude Code | `.claude/settings.json`                                           | `permissions.deny` / `ask`、`sandbox`、`hooks.PreToolUse`             | Basic〜    |
+| Claude Code | `.claude/hooks/guard-bash.sh`                                     | 取得物のシェル直結、秘密ファイル読取、自己設定書換の遮断                                        | Basic〜    |
+| Claude Code | `managed-settings.json`                                           | 組織配布、`allowManagedPermissionRulesOnly`、`allowManagedHooksOnly`      | Standard〜 |
+| Cursor CLI  | `.cursor/cli.json`                                                | `permissions.allow` / `deny`                                        | Basic〜    |
+| Cursor IDE  | `.cursorignore`、`.cursor/permissions.json`、`.cursor/sandbox.json` | 秘密ファイル不可視化、Run Mode、ネットワーク                                          | Basic〜    |
+| Codex CLI   | `~/.codex/config.toml`                                            | `approval_policy = "on-request"`、`sandbox_mode = "workspace-write"` | Basic〜    |
+| 隔離環境        | `.devcontainer/`、`Dockerfile`、`seccomp-ssdm.json`                 | 非 root、capability 削除、`--network none`                               | Advanced  |
+
 
 秘密情報（API キー、トークン、鍵）は設定ファイルに記載しないでください（MUST NOT）。必要な場合は `<YOUR_API_KEY>` のようなプレースホルダーと環境変数で扱います。
 
@@ -155,6 +200,8 @@ Basic のパーミッション確認は、対象プロジェクトのルート�
 ./ssdm-lockdown.sh --check
 ```
 
+
+
 ### 9. Development
 
 本リポジトリへの文書追加・更新時のルールです（SHOULD）。
@@ -170,25 +217,33 @@ Basic のパーミッション確認は、対象プロジェクトのルート�
 
 本リポジトリ自体の自動テストはありません。導入先での検証ケースが各文書に定義されています。
 
-| 文書 | 検証 ID | 例 |
-| --- | --- | --- |
-| フロントエンド Basic | V1〜V6 | README 内の注入命令を実行しない、`.env` 表示を拒否、`npm test` は通常実行 |
-| フロントエンド Standard / Advanced | V7〜（追加分） | 各文書 §5 を参照 |
-| バックエンド Basic | BE-1〜BE-7 | `ssdm-lockdown.sh --check` が OK、`cat .env` を遮断、`.env` のコミットを遮断 |
-| バックエンド Standard / Advanced | BE-8〜（追加分） | 各文書 §7 を参照 |
+
+| 文書                          | 検証 ID      | 例                                                              |
+| --------------------------- | ---------- | -------------------------------------------------------------- |
+| フロントエンド Basic               | V1〜V6      | README 内の注入命令を実行しない、`.env` 表示を拒否、`npm test` は通常実行              |
+| フロントエンド Standard / Advanced | V7〜（追加分）   | 各文書 §5 を参照                                                     |
+| バックエンド Basic                | BE-1〜BE-7  | `ssdm-lockdown.sh --check` が OK、`cat .env` を遮断、`.env` のコミットを遮断 |
+| バックエンド Standard / Advanced  | BE-8〜（追加分） | 各文書 §7 を参照                                                     |
+
 
 文書内に記載された動作確認済みの範囲:
 
 - `guard-bash.sh`: 2026-09-19、bash + jq で 18 ケースが期待どおり
 - `ssdm-lockdown.sh`: 2026-09-19、Linux で確認
 
+
+
 ### 11. Deployment / Operation
 
-| ティア | 配布方法 | 運用 |
-| --- | --- | --- |
-| Basic | リポジトリにコミットした設定ファイル | `.claude/settings.local.json` の個人 `allow` を月 1 回確認 |
-| Standard | managed settings（MDM / システムディレクトリ / 管理コンソール）、root 所有のフック＋`SHA256SUMS` | ツール呼出単位の監査ログを組織ストレージへ転送、管理責任者を 1 名定める |
-| Advanced | 隔離環境（Dev Container / VM）、検査プロキシ、WORM ログ | 四半期のレッドチーム評価、E 層設定変更は 2 名承認＋署名付きコミット |
+
+| ティア      | 配布方法                                                                  | 運用                                                 |
+| -------- | --------------------------------------------------------------------- | -------------------------------------------------- |
+| Basic    | リポジトリにコミットした設定ファイル                                                    | `.claude/settings.local.json` の個人 `allow` を月 1 回確認 |
+| Standard | managed settings（MDM / システムディレクトリ / 管理コンソール）、root 所有のフック＋`SHA256SUMS` | ツール呼出単位の監査ログを組織ストレージへ転送、管理責任者を 1 名定める              |
+| Advanced | 隔離環境（Dev Container / VM）、検査プロキシ、WORM ログ                               | 四半期のレッドチーム評価、E 層設定変更は 2 名承認＋署名付きコミット               |
+
+
+
 
 ### 12. Security Notes
 
@@ -199,15 +254,21 @@ Basic のパーミッション確認は、対象プロジェクトのルート�
 - Advanced の外部規範（医療・金融・官公庁）は一部原典未確認です。適用前に法務・コンプライアンス部門が該当条項を特定してください（MUST）
 - 脆弱性報告窓口（`SECURITY.md`）: 明示なし
 
+
+
 ### 13. Troubleshooting
 
-| 症状 | 原因と対処 |
-| --- | --- |
-| Windows でサンドボックスが効かない | Claude Code はネイティブ Windows 非対応。WSL2 で実行するか、E1〜E3 を `permissions` だけで担保する |
-| `guard-bash.sh` が全コマンドを遮断する | `jq` が未インストールで入力 JSON を解釈できていない可能性。`jq` を導入し、`chmod +x` を確認する |
-| `ssdm-lockdown.sh --check` が鍵ファイルの NG を exit code に反映しない | 既知の仕様。`find` 内の判定はサブシェルで動くため、鍵ファイルは表示で確認する |
-| Cursor CLI で `git push --force` が通る | `Shell(git)` を allow すると先頭トークン照合のため通る。L-N の N4 とリモート側のブランチ保護で止める |
-| Codex CLI でファイル単位の deny ができない | 同等構文は未確認（要確認）。`sandbox_mode = "workspace-write"` と `.gitignore` 運用で代替する |
+
+| 症状                                                       | 原因と対処                                                                    |
+| -------------------------------------------------------- | ------------------------------------------------------------------------ |
+| Windows でサンドボックスが効かない                                    | Claude Code はネイティブ Windows 非対応。WSL2 で実行するか、E1〜E3 を `permissions` だけで担保する |
+| `guard-bash.sh` が全コマンドを遮断する                              | `jq` が未インストールで入力 JSON を解釈できていない可能性。`jq` を導入し、`chmod +x` を確認する            |
+| `ssdm-lockdown.sh --check` が鍵ファイルの NG を exit code に反映しない | 既知の仕様。`find` 内の判定はサブシェルで動くため、鍵ファイルは表示で確認する                               |
+| Cursor CLI で `git push --force` が通る                      | `Shell(git)` を allow すると先頭トークン照合のため通る。L-N の N4 とリモート側のブランチ保護で止める         |
+| Codex CLI でファイル単位の deny ができない                            | 同等構文は未確認（要確認）。`sandbox_mode = "workspace-write"` と `.gitignore` 運用で代替する  |
+
+
+
 
 ### 14. Roadmap
 
@@ -227,7 +288,11 @@ UNKNOWN（`LICENSE` ファイルなし）。公開・再利用の前にライセ
 
 ---
 
+
+
 ## 第 2 部: 非エンジニア向け
+
+
 
 ### 1. このリポジトリでできること
 
@@ -237,14 +302,20 @@ AI に仕事を任せるときの「安全のための決まりごと」と「�
 - AI がルールを破っても、大事な情報や設定に触れられないようにする設定例
 - 正しく設定できたかを確かめるチェック項目
 
+
+
 ### 2. 誰のためのものか
 
-| 立場 | 使い方 |
-| --- | --- |
-| AI エージェントを使う開発者 | 自分のプロジェクトに設定を入れる |
+
+| 立場                | 使い方                       |
+| ----------------- | ------------------------- |
+| AI エージェントを使う開発者   | 自分のプロジェクトに設定を入れる          |
 | 情報システム部門・セキュリティ担当 | 社内の AI 利用ルールと配布設定のたたき台にする |
-| 管理職・経営者 | 自社がどの段階の対策を取るべきか判断する材料にする |
-| 法務・コンプライアンス担当 | 医療・金融・行政など規制業種での適用可否を確認する |
+| 管理職・経営者           | 自社がどの段階の対策を取るべきか判断する材料にする |
+| 法務・コンプライアンス担当     | 医療・金融・行政など規制業種での適用可否を確認する |
+
+
+
 
 ### 3. 解決する課題
 
@@ -260,11 +331,13 @@ AI エージェントは、読み込んだ文書やウェブページに紛れ�
 
 扱う情報の重要度と、AI に任せる範囲で 3 段階から選びます。
 
-| 段階 | 目安 | 例 |
-| --- | --- | --- |
-| Basic | 公開情報や自社内だけの情報。AI の作業は手元のフォルダ内まで | 個人開発、小さな会社の社内ツール |
+
+| 段階       | 目安                                   | 例                        |
+| -------- | ------------------------------------ | ------------------------ |
+| Basic    | 公開情報や自社内だけの情報。AI の作業は手元のフォルダ内まで      | 個人開発、小さな会社の社内ツール         |
 | Standard | 顧客の個人情報や守秘義務のある情報を扱う。AI が外部サービスに書き込む | 税理士・弁護士事務所、上場企業、情報システム部門 |
-| Advanced | 医療情報・決済情報・行政の機密を扱う。本番システムに影響し得る | 病院、金融機関、官公庁 |
+| Advanced | 医療情報・決済情報・行政の機密を扱う。本番システムに影響し得る      | 病院、金融機関、官公庁              |
+
 
 迷ったら上の段階を選びます。選んだ段階の文書を担当エンジニアに渡し、設定とチェックを依頼してください。
 
@@ -275,6 +348,8 @@ AI エージェントは、読み込んだ文書やウェブページに紛れ�
 - 秘密のファイルは、AI が読もうとしても仕組みの側で止まる
 - Standard 以上では、AI の操作記録が残り、後から確認できるようになる
 
+
+
 ### 6. 注意点
 
 - 本リポジトリはまだ **レビュー待ちの草案** です。重要な業務に使う前に、社内の担当者による確認が必要です
@@ -282,6 +357,8 @@ AI エージェントは、読み込んだ文書やウェブページに紛れ�
 - AI ツールの仕様はよく変わります。設定例は 2026 年 9 月時点の情報に基づいています
 - 医療・金融・行政向けの法令やガイドラインは、一部まだ原文を確認していません。必ず法務部門に確認してください
 - 利用条件（ライセンス）はまだ決まっていません
+
+
 
 ### 7. よくある質問
 
@@ -314,10 +391,15 @@ Claude Code、Cursor、Codex CLI の 3 つです。それ以外のツールは�
 
 ---
 
+
+
 ## 関連資料
 
-| 資料 | URL |
-| --- | --- |
-| Semantic Security Inspection CLI Agent — Executive Summary | https://gist.github.com/ak1xra/b48fd5b9439356b6e23dd749ae972cbc |
-| 01_Semantic-Security-Agent_Development-Specification | https://gist.github.com/ak1xra/9c499555dd2ddad74642b88e70c317d8 |
-| 02_Semantic-Security-Agent_System-Design | https://gist.github.com/ak1xra/79bdf7dc23f331afc7202ca292a47e53 |
+
+| 資料                                                   | URL                                                                                                                                |
+| ---------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| c — Executive Summary                                | [https://gist.github.com/ak1xra/b48fd5b9439356b6e23dd749ae972cbc](https://gist.github.com/ak1xra/b48fd5b9439356b6e23dd749ae972cbc) |
+| 01_Semantic-Security-Agent_Development-Specification | [https://gist.github.com/ak1xra/9c499555dd2ddad74642b88e70c317d8](https://gist.github.com/ak1xra/9c499555dd2ddad74642b88e70c317d8) |
+| 02_Semantic-Security-Agent_System-Design             | [https://gist.github.com/ak1xra/79bdf7dc23f331afc7202ca292a47e53](https://gist.github.com/ak1xra/79bdf7dc23f331afc7202ca292a47e53) |
+
+
