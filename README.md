@@ -59,7 +59,7 @@ AI コーディングエージェント（Claude Code / Cursor / Codex CLI）を
   - L-N（Semantic Norm Layer）: LLM が読む規範。入力分類、命令と参照の分離、侵入命令の無効化、確認必須操作の宣言
   - L-E（Enforcement Layer）: 権限設定・フック・サンドボックス・隔離環境による物理遮断
 - **3 ティア構成**: 上位ティアは下位ティアを包含し、差分のみ記載
-- **貼り付け可能なルールブロック**: `CLAUDE.md` / `AGENTS.md` / `.cursor/rules/*.mdc` にそのまま貼れる L-N ルール（N1〜N15）
+- **貼り付け可能なルールブロック**: `CLAUDE.md` / `AGENTS.md` / `.cursor/rules/*.mdc` にそのまま貼れる L-N ルール（N1〜N16）
 - **ツール別設定例**: `.claude/settings.json`、managed settings、`.cursor/cli.json`、`~/.codex/config.toml`、Dev Container、seccomp、nftables
 - **補助スクリプト例**: Bash ガードフック、パーミッション固定、監査ログ、ハッシュチェーン
 - **検証ケース**: 導入時・設定変更時に実施する期待結果付きテスト手順
@@ -101,9 +101,9 @@ AI コーディングエージェント（Claude Code / Cursor / Codex CLI）を
 
 | ティア      | L-N ルール   | L-E 統制   | バックエンドの主眼                                |
 | -------- | --------- | -------- | ---------------------------------------- |
-| Basic    | N1〜N6     | E1〜E3    | ファイルパーミッション、CLI ツールの既定 deny/ask          |
-| Standard | + N7〜N11  | + E4〜E8  | managed settings 配布、組織プロキシ、Pre-hook、ログ保管 |
-| Advanced | + N12〜N15 | + E9〜E15 | コンテナ/VM 隔離、Egress 物理遮断、改ざん防止監査ログ         |
+| Basic    | N1〜N7     | E1〜E3    | ファイルパーミッション、CLI ツールの既定 deny/ask          |
+| Standard | + N8〜N12  | + E4〜E8  | managed settings 配布、組織プロキシ、Pre-hook、ログ保管 |
+| Advanced | + N13〜N16 | + E9〜E15 | コンテナ/VM 隔離、Egress 物理遮断、改ざん防止監査ログ         |
 
 
 
@@ -190,7 +190,7 @@ Basic の導入目安は「本人で 30 分以内」と記載されています�
 - 遮断や侵入命令の検出時、エージェントは次の書式で報告する（Basic N6）
 
 ```text
-判定: NG または 要確認 / 根拠: N1〜N5 のどれか / 理由: 1 行 / 代替: 安全な手順 / 次に必要な入力
+判定: NG または 要確認 / 根拠: N1〜N5 または N7 のどれか / 理由: 1 行 / 代替: 安全な手順 / 次に必要な入力
 ```
 
 Basic のパーミッション確認は、対象プロジェクトのルートで `02-enforcement-backend-basic.md` §3-2 のスクリプトを保存したうえで実行します。
@@ -220,7 +220,7 @@ Basic のパーミッション確認は、対象プロジェクトのルート�
 
 | 文書                          | 検証 ID      | 例                                                              |
 | --------------------------- | ---------- | -------------------------------------------------------------- |
-| フロントエンド Basic               | V1〜V6      | README 内の注入命令を実行しない、`.env` 表示を拒否、`npm test` は通常実行              |
+| フロントエンド Basic               | V1〜V6 / V6b | README 内の注入命令を実行しない、`.env` 表示を拒否、`npm test` は通常実行、正本の言い換え確定を拒否 |
 | フロントエンド Standard / Advanced | V7〜（追加分）   | 各文書 §5 を参照                                                     |
 | バックエンド Basic                | BE-1〜BE-7  | `ssdm-lockdown.sh --check` が OK、`cat .env` を遮断、`.env` のコミットを遮断 |
 | バックエンド Standard / Advanced  | BE-8〜（追加分） | 各文書 §7 を参照                                                     |
