@@ -289,7 +289,7 @@ Release plan · versioning policy: [Not specified]
 
 ### 15. License
 
-Undecided (no `LICENSE` file). Choose a license before going public. For this documentation-first repository, **CC-BY-4.0** is recommended; if you prefer a single license covering both docs and example scripts, use **Apache-2.0** (alternatives to MIT).
+[Creative Commons Attribution 4.0 International (CC-BY-4.0)](https://creativecommons.org/licenses/by/4.0/). See [`LICENSE`](LICENSE).
 
 ---
 
@@ -361,7 +361,7 @@ When in doubt, choose the higher stage. Hand the documents for the chosen stage 
 - Introducing countermeasures does not make risk zero. Periodic review is necessary
 - AI tool specifications change often. Configuration examples are based on information as of September 2026
 - Laws and guidelines for healthcare · finance · government have partly not yet had their original texts confirmed. Always confirm with the legal department
-- Terms of use (license) have not yet been decided
+- Terms of use are [CC-BY-4.0](https://creativecommons.org/licenses/by/4.0/) (see [`LICENSE`](LICENSE))
 
 
 

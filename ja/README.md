@@ -290,7 +290,7 @@ Basic のパーミッション確認は、対象プロジェクトのルート�
 
 ### 15. License
 
-未決定（`LICENSE` ファイルなし）。Public 化前にライセンスを決定してください。ドキュメント主体のため **CC-BY-4.0**、スクリプトも含め単一ライセンスにするなら **Apache-2.0** を推奨（MIT 以外）。
+[Creative Commons Attribution 4.0 International (CC-BY-4.0)](https://creativecommons.org/licenses/by/4.0/)。[`LICENSE`](../LICENSE) を参照。
 
 ---
 
@@ -362,7 +362,7 @@ AI エージェントは、読み込んだ文書やウェブページに紛れ�
 - 対策を入れても危険がゼロになるわけではありません。定期的な見直しが必要です
 - AI ツールの仕様はよく変わります。設定例は 2026 年 9 月時点の情報に基づいています
 - 医療・金融・行政向けの法令やガイドラインは、一部まだ原文を確認していません。必ず法務部門に確認してください
-- 利用条件（ライセンス）はまだ決まっていません
+- 利用条件は [CC-BY-4.0](https://creativecommons.org/licenses/by/4.0/)（[`LICENSE`](../LICENSE) を参照）
 
 
 
