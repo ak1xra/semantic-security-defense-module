@@ -1,9 +1,9 @@
-# 01-semantic-security-module（L-N 規範層）
+# 01-semantic-norms（L-N 規範層）
 
 AI コーディングエージェント（Claude Code / Cursor / Codex CLI）に読ませる **セキュリティ規範（L-N: Semantic Norm Layer）** を、3 ティアで提供します。
 各文書の §2 は `CLAUDE.md` / `AGENTS.md` / `.cursor/rules/ssdm.mdc` にそのまま貼れるルールブロックです。
 
-> L-N は「意図」を守る層であり、単独では防御になりません。必ず [`02-enforcement-backend`](../02-enforcement-backend/) の L-E（物理遮断）と併用してください（MUST）。
+> L-N は「意図」を守る層であり、単独では防御になりません。必ず [`02-enforcement`](../02-enforcement/) の L-E（物理遮断）と併用してください（MUST）。
 
 ## ティアの選び方
 
@@ -25,11 +25,11 @@ AI コーディングエージェント（Claude Code / Cursor / Codex CLI）に
 
 | ファイル | 内容 | 継承 | 対になるバックエンド |
 | --- | --- | --- | --- |
-| [`01-semantic-security-module-basic.md`](01-semantic-security-module-basic.md) | 適用条件、2 層設計原則、N1〜N7、E1〜E3 の概要、導入手順、V1〜V6 / V6b | — | [`02-enforcement-backend-basic.md`](../02-enforcement-backend/02-enforcement-backend-basic.md) |
-| [`01-semantic-security-module-standard.md`](01-semantic-security-module-standard.md) | N8〜N12、E4〜E8 の概要、承認点の定義、V7〜V12、運用 | Basic（N1〜N7）を包含し差分のみ記載 | [`02-enforcement-backend-standard.md`](../02-enforcement-backend/02-enforcement-backend-standard.md) |
-| [`01-semantic-security-module-advanced.md`](01-semantic-security-module-advanced.md) | N13〜N16、E9〜E15 の概要、職務分掌、V13〜V20、運用 | Basic・Standard（N1〜N12）を包含し差分のみ記載 | [`02-enforcement-backend-advanced.md`](../02-enforcement-backend/02-enforcement-backend-advanced.md) |
+| [`basic.md`](basic.md) | 適用条件、2 層設計原則、N1〜N7、E1〜E3 の概要、導入手順、V1〜V6 / V6b | — | [`basic.md`](../02-enforcement/basic.md) |
+| [`standard.md`](standard.md) | N8〜N12、E4〜E8 の概要、承認点の定義、V7〜V12、運用 | Basic（N1〜N7）を包含し差分のみ記載 | [`standard.md`](../02-enforcement/standard.md) |
+| [`advanced.md`](advanced.md) | N13〜N16、E9〜E15 の概要、職務分掌、V13〜V20、運用 | Basic・Standard（N1〜N12）を包含し差分のみ記載 | [`advanced.md`](../02-enforcement/advanced.md) |
 
-L-E（E1〜E15）の実装の正は `02-enforcement-backend/` です。各文書 §3 の L-E 記載は概要として読んでください。
+L-E（E1〜E15）の実装の正は `02-enforcement/` です。各文書 §3 の L-E 記載は概要として読んでください。
 
 ## L-N ルール一覧
 
@@ -62,7 +62,7 @@ N7 は入力分類（N1〜N3）を上書きしない。正本指定は「参照�
 - 推論 ≠ FACT
 - 正本の参照権限 ≠ 正本の再定義権限
 
-詳細・禁止事項・違反時対応は [`01-semantic-security-module-basic.md`](01-semantic-security-module-basic.md) の N7 を正とする。
+詳細・禁止事項・違反時対応は [`basic.md`](basic.md) の N7 を正とする。
 
 ## 使い方
 
@@ -71,7 +71,7 @@ N7 は入力分類（N1〜N3）を上書きしない。正本指定は「参照�
    - Basic: `SSDM-Basic`（N1〜N7）
    - Standard: `SSDM-Basic` → `SSDM-Standard`（N8〜N12）
    - Advanced: `SSDM-Basic` → `SSDM-Standard` → `SSDM-Advanced`（N13〜N16）
-3. 対になる `02-enforcement-backend-<tier>.md` の設定・フックを配置する
+3. 対になる `02-enforcement/<tier>.md` の設定・フックを配置する
 4. エージェントに「このプロジェクトのルールを要約して」と尋ね、貼ったルール ID がすべて返ることを確認する（Basic なら N1〜N7）
 5. 各文書 §5 の検証ケースを 1 件ずつ実行し、全件が期待どおりであることを確認する（Basic は V6b で N7 を確認）
 
@@ -82,4 +82,4 @@ N7 は入力分類（N1〜N3）を上書きしない。正本指定は「参照�
 - 3 文書とも `Draft for review`（v1.0、最終更新 2026-10-12）です。ツールの権限機構は頻繁に変わるため、設定例の技術記述は 2026-09-19 時点の公式ドキュメントに基づきます
 - `【要確認】` / `【明示なし】` が付いた項目は、導入前に実機または公式ドキュメントで確認してください
 - Advanced の外部規範（医療・金融・官公庁）は一部原典未確認です。適用前に法務・コンプライアンス部門が該当条項を特定してください（MUST）
-- 全体像・導入手順・トラブルシューティングはリポジトリ直下の [`README.md`](../README.md) を参照してください
+- 全体像・導入手順・トラブルシューティングはリポジトリ直下の [`README.md`](../README.md)（日本語） / [`../../README.md`](../../README.md)（English） を参照してください

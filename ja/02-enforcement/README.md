@@ -2,7 +2,7 @@
 status: "Doing"
 ---
 
-# 02-enforcement-backend（L-E 物理強制層）
+# 02-enforcement（L-E 物理強制層）
 
 AI コーディングエージェント（Claude Code / Cursor / Codex CLI）の操作を、**LLM の判定に頼らず物理的に止める層（L-E: Enforcement Layer）** を、3 ティアで提供します。
 ファイルパーミッション、ツールの deny / ask、サンドボックス、組織プロキシ、フック、監査ログ、隔離環境の設定例と補助スクリプトを収録しています。
@@ -13,10 +13,10 @@ AI コーディングエージェント（Claude Code / Cursor / Codex CLI）の
 
 | 層 | 守るもの | 破られたときの結果 | 担当 |
 | --- | --- | --- | --- |
-| [`01-semantic-security-module`](../01-semantic-security-module/)（L-N） | エージェントの「意図」。入力分類、参照の非実行、確認要求 | 誤った意図が形成される | ルールファイル |
-| `02-enforcement-backend`（L-E、本フォルダ） | 操作の「結果」 | 実害が発生する | OS・ツール設定・インフラ |
+| [`01-semantic-norms`](../01-semantic-norms/)（L-N） | エージェントの「意図」。入力分類、参照の非実行、確認要求 | 誤った意図が形成される | ルールファイル |
+| `02-enforcement`（L-E、本フォルダ） | 操作の「結果」 | 実害が発生する | OS・ツール設定・インフラ |
 
-`01-*` 各文書 §3 の L-E 記載は本フォルダへ移管済みです。**E1〜E15 の実装は `02-*` が正** です。
+`01-semantic-norms/` 各文書 §3 の L-E 記載は本フォルダへ移管済みです。**E1〜E15 の実装は `02-enforcement/` が正** です。
 
 ## ティアの選び方
 
@@ -42,16 +42,16 @@ AI コーディングエージェント（Claude Code / Cursor / Codex CLI）の
 
 | ファイル | 主な内容 | 継承 | 対になるフロントエンド |
 | --- | --- | --- | --- |
-| [`02-enforcement-backend-basic.md`](02-enforcement-backend-basic.md) | 保護対象 B-1〜B-5、パーミッション規定値、`ssdm-lockdown.sh`、ツール別の既定 deny / ask、Git 保護、BE-1〜BE-7 | — | [`01-semantic-security-module-basic.md`](../01-semantic-security-module/01-semantic-security-module-basic.md) |
-| [`02-enforcement-backend-standard.md`](02-enforcement-backend-standard.md) | 自己設定保護の 3 方式、組織プロキシ PX-1〜PX-4、`guard-mcp.sh`、managed settings のフック構成、ログ保管と fluent-bit 設定例、BE-8〜BE-14 | Basic を包含し差分のみ記載 | [`01-semantic-security-module-standard.md`](../01-semantic-security-module/01-semantic-security-module-standard.md) |
-| [`02-enforcement-backend-advanced.md`](02-enforcement-backend-advanced.md) | 隔離アーキテクチャ、`devcontainer.json`・`Dockerfile`・seccomp、ホスト要件、Egress 遮断（internal ネットワーク、nftables、検査プロキシ）、`audit-chain.sh`、職務分掌、BE-15〜BE-25 | Basic・Standard を包含し差分のみ記載 | [`01-semantic-security-module-advanced.md`](../01-semantic-security-module/01-semantic-security-module-advanced.md) |
+| [`basic.md`](basic.md) | 保護対象 B-1〜B-5、パーミッション規定値、`ssdm-lockdown.sh`、ツール別の既定 deny / ask、Git 保護、BE-1〜BE-7 | — | [`basic.md`](../01-semantic-norms/basic.md) |
+| [`standard.md`](standard.md) | 自己設定保護の 3 方式、組織プロキシ PX-1〜PX-4、`guard-mcp.sh`、managed settings のフック構成、ログ保管と fluent-bit 設定例、BE-8〜BE-14 | Basic を包含し差分のみ記載 | [`standard.md`](../01-semantic-norms/standard.md) |
+| [`advanced.md`](advanced.md) | 隔離アーキテクチャ、`devcontainer.json`・`Dockerfile`・seccomp、ホスト要件、Egress 遮断（internal ネットワーク、nftables、検査プロキシ）、`audit-chain.sh`、職務分掌、BE-15〜BE-25 | Basic・Standard を包含し差分のみ記載 | [`advanced.md`](../01-semantic-norms/advanced.md) |
 
 ## 収録している設定とスクリプト
 
 | 種別 | 名前 | 用途 | ティア |
 | --- | --- | --- | --- |
 | スクリプト | `ssdm-lockdown.sh` | パーミッションと `.gitignore` の確認・修正（`--check` で差分検出のみ） | Basic |
-| フック | `guard-bash.sh` | 取得物のシェル直結、復号実行、秘密読取、設定書換の遮断（実体は `01-*-basic.md` §3-2） | Basic〜 |
+| フック | `guard-bash.sh` | 取得物のシェル直結、復号実行、秘密読取、設定書換の遮断（実体は `01-semantic-norms/basic.md` §3-2） | Basic〜 |
 | フック | `audit-log.sh` | ツール呼出の監査ログ（JSON Lines。出力本文は記録しない） | Standard〜 |
 | フック | `guard-mcp.sh` | 許可リスト外の MCP サーバ呼出を遮断 | Standard〜 |
 | フック | `verify-hooks.sh` | 起動時にフックのハッシュを `SHA256SUMS` と照合 | Standard〜 |
@@ -67,7 +67,7 @@ AI コーディングエージェント（Claude Code / Cursor / Codex CLI）の
 
 1. 上表で自プロジェクトのティアを決める（フロントエンドと同じティアにする）
 2. 該当ティアまでの文書を Basic から順に読み、設定ファイル・フック・スクリプトを対象プロジェクトまたは組織配布先に配置する
-3. 対になる `01-*-<tier>.md` の L-N ルールブロックをエージェントの指示ファイルに貼る
+3. 対になる `01-semantic-norms/<tier>.md` の L-N ルールブロックをエージェントの指示ファイルに貼る
 4. 各文書の検証ケースを 1 件ずつ実行し、全件が期待どおりであることを確認する
 5. 設定とフックを Git で管理し、Standard 以上は変更に承認者を置く（Advanced は 2 名承認＋署名付きコミット）
 
@@ -90,4 +90,4 @@ Basic のパーミッション確認は、対象プロジェクトのルート�
 - `audit-chain.sh` はチェーン単独では末尾行の削除を検出できません。head hash を外部アンカーとして独立保管し、検証時に照合してください（Advanced で必須）
 - 未検証の項目があります。nftables の構文、seccomp の追加拒否セット、fluent-bit の実環境動作、Cursor・Codex のプロキシ設定キー、Codex `requirements.toml` の書式などです。`【要確認】` / `【仮説】` が付いた項目は導入前に実機で確認してください
 - 文書内の危険なコマンド例（`rm -rf`、`git push --force`、`curl ... | sh` など）は遮断対象の例です。実行しないでください
-- 全体像・トラブルシューティングはリポジトリ直下の [`README.md`](../README.md) を参照してください
+- 全体像・トラブルシューティングはリポジトリ直下の [`README.md`](../README.md)（日本語） / [`../../README.md`](../../README.md)（English） を参照してください
